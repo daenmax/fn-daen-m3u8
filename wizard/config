@@ -1,0 +1,27 @@
+[
+    {
+        "stepTitle": "运行配置",
+        "items": [
+            {
+                "type": "tips",
+                "helpText": "请确认配置参数，如无特殊要求，建议使用默认值"
+            },
+            {
+                "type": "text",
+                "field": "M3U8_JOB_NUM",
+                "label": "线程数",
+                "initValue": "5",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入线程数"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*$",
+                        "message": "线程数必须是正数"
+                    }
+                ]
+            }
+        ]
+    }
+]
