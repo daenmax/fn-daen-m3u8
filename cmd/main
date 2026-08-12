@@ -3,8 +3,10 @@
 LOG_FILE="${TRIM_PKGVAR}/info.log"
 PID_FILE="${TRIM_PKGVAR}/app.pid"
 
-# write the command to start your program here 
-CMD=""
+# 应用 UI 通过 fnOS 的 CGI 机制（app/ui/index.cgi）提供，无需自身常驻服务。
+# 为保证应用处于"运行中"状态，这里保持一个常驻保活进程。
+# 下载任务由 CGI 独立后台触发，不受此进程影响。
+CMD="sleep infinity"
 
 log_msg() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> ${LOG_FILE}
@@ -71,6 +73,22 @@ check_process() {
     fi
 }
 
+# 将系统注入的 TRIM_* 环境变量持久化，供 CGI 进程（fnOS 不向其注入 TRIM_*）读取。
+# status 被系统周期性调用、config/install 回调在配置变更时调用，保证授权目录等及时同步。
+persist_env() {
+    local conf="${TRIM_PKGVAR}/app_env.conf"
+    {
+        echo "TRIM_APPDEST='${TRIM_APPDEST:-}'"
+        echo "TRIM_PKGVAR='${TRIM_PKGVAR:-}'"
+        echo "TRIM_DATA_SHARE_PATHS='${TRIM_DATA_SHARE_PATHS:-}'"
+        echo "TRIM_DATA_ACCESSIBLE_PATHS='${TRIM_DATA_ACCESSIBLE_PATHS:-}'"
+        echo "M3U8_JOB_NUM='${M3U8_JOB_NUM:-}'"
+        echo "M3U8_JOB_DOWNLOAD_NUM='${M3U8_JOB_DOWNLOAD_NUM:-}'"
+        echo "M3U8_REFRESH_SECOND='${M3U8_REFRESH_SECOND:-}'"
+    } > "${conf}" 2>/dev/null
+    chmod 644 "${conf}" 2>/dev/null
+}
+
 status() {
     if [ -f "${PID_FILE}" ]; then
         pid=$(head -n 1 "${PID_FILE}" | tr -d '[:space:]')
@@ -88,14 +106,17 @@ status() {
 case $1 in
 start)
     # run start command. exit 0 if success, exit 1 if failed
+    persist_env
     start_process
     ;;
 stop)
     # run stop command. exit 0 if success, exit 1 if failed
+    persist_env
     stop_process
     ;;
 status)
     # check application status command. exit 0 if running, exit 3 if not running
+    persist_env
     if status; then 
         exit 0
     else 

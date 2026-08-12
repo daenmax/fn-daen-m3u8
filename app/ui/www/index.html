@@ -1,10 +1,66 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daen的m3u8下载器</title>
+    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-sdgnsodihgsidg
+    <header class="topbar">
+        <h1>Daen 的 M3U8 下载器</h1>
+        <span class="subtitle">基于 N_m3u8DL-RE</span>
+    </header>
+
+    <main class="container">
+        <section class="panel input-panel">
+            <h2>新建下载任务</h2>
+            <p class="hint">每行一个 m3u8 地址，点击"开始下载"后所有地址将同时开始下载。</p>
+            <textarea id="urls" rows="6" placeholder="https://example.com/video/index.m3u8&#10;https://example.com/movie/master.m3u8"></textarea>
+            <div class="options-row">
+                <label for="dirSelect">下载到：</label>
+                <select id="dirSelect"></select>
+                <label for="folderName">文件夹名：</label>
+                <input type="text" id="folderName" maxlength="100" placeholder="留空则直接下载到所选目录">
+                <label for="threads">线程数：</label>
+                <input type="number" id="threads" min="1" max="64" value="5">
+                <button id="startBtn" class="btn primary">开始下载</button>
+                <span id="formError" class="error"></span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <h2>下载任务 <span id="taskCount" class="count"></span></h2>
+                <div class="panel-actions">
+                    <button id="clearLogsBtn" class="btn ghost">清空任务</button>
+                    <button id="refreshBtn" class="btn ghost">刷新</button>
+                </div>
+            </div>
+            <div id="taskList" class="task-list"></div>
+            <p id="emptyTip" class="empty">暂无任务，请在上方输入 m3u8 地址。</p>
+        </section>
+
+        <footer class="footer">
+            欢迎使用
+        </footer>
+    </main>
+
+    <!-- 日志弹窗 -->
+    <div id="logModal" class="modal-overlay" hidden>
+        <div class="modal">
+            <div class="modal-head">
+                <span id="logModalTitle" class="modal-title">任务日志</span>
+                <div class="modal-actions">
+                    <button id="logRefreshBtn" class="btn ghost">刷新</button>
+                    <button id="logCopyBtn" class="btn ghost">复制</button>
+                    <button id="logCloseBtn" class="btn ghost">关闭</button>
+                </div>
+            </div>
+            <pre id="logContent" class="modal-log"></pre>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
 </body>
 </html>

@@ -1,5 +1,36 @@
 #!/bin/bash
 
-### This script is called after the user uninstalls the application.
+### This script is called before the user uninstalls the application.
+### 卸载时删除本应用的全部数据目录：
+###   @appdata/@appconf/@apphome/@appmeta/@apptemp 下的 {appname} 目录（运行数据、日志、任务信息）
+###   @appshare 下的 {appname} 目录（共享目录，包含用户下载的视频文件）
+### 注意：共享目录中的下载文件会随卸载一并删除。
+
+APPNAME="${TRIM_APPNAME:-fn-daen-m3u8}"
+
+# 1. 停止残留的下载进程
+if [ -n "${TRIM_APPDEST:-}" ]; then
+    pkill -f "${TRIM_APPDEST}/bin/N_m3u8DL-RE" 2>/dev/null
+fi
+
+# 2. 删除通过 TRIM_* 变量获取的应用数据目录（仅匹配 /vol*/@app*/{appname}，防空变量误删）
+for v in TRIM_PKGVAR TRIM_PKGETC TRIM_PKGHOME TRIM_PKGMETA TRIM_PKGTMP; do
+    p="${!v:-}"
+    case "$p" in
+        /vol*/@app*/"${APPNAME}"|/volume*/@app*/"${APPNAME}") rm -rf "$p" ;;
+    esac
+done
+
+# 3. 删除共享目录存储（@appshare/{appname}）：通过 /var/apps/{appname}/share 软链解析真实路径
+share_root="/var/apps/${APPNAME}/share"
+if [ -d "$share_root" ]; then
+    real="$(readlink -f "$share_root"/* 2>/dev/null | head -n1)"
+    if [ -n "$real" ]; then
+        appshare_dir="$(dirname "$(dirname "$real")")"
+        case "$appshare_dir" in
+            /vol*/@appshare/"${APPNAME}"|/volume*/@appshare/"${APPNAME}") rm -rf "$appshare_dir" ;;
+        esac
+    fi
+fi
 
 exit 0

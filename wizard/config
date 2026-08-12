@@ -9,8 +9,8 @@
             {
                 "type": "text",
                 "field": "M3U8_JOB_NUM",
-                "label": "线程数",
-                "initValue": "5",
+                "label": "单任务线程数",
+                "initValue": "10",
                 "rules": [
                     {
                         "required": true,
@@ -18,7 +18,40 @@
                     },
                     {
                         "pattern": "^[1-9]\\d*$",
-                        "message": "线程数必须是正数"
+                        "message": "线程数必须是正整数"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "M3U8_JOB_DOWNLOAD_NUM",
+                "label": "同时下载任务数",
+                "helpText": "同时最多下载的任务个数，超出部分排队等待",
+                "initValue": "5",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入同时下载任务数"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*$",
+                        "message": "必须是正整数"
+                    }
+                ]
+            },
+            {
+                "type": "text",
+                "field": "M3U8_REFRESH_SECOND",
+                "label": "任务列表刷新间隔（秒）",
+                "initValue": "2",
+                "rules": [
+                    {
+                        "required": true,
+                        "message": "请输入刷新间隔"
+                    },
+                    {
+                        "pattern": "^[1-9]\\d*$",
+                        "message": "必须是正整数"
                     }
                 ]
             }

@@ -1,12 +1,12 @@
 {
     ".url": {
-        "daen-m3u8.Application": {
+        "fn-daen-m3u8.Application": {
             "title": "Daen的m3u8下载器",
             "icon": "images/icon_{0}.png",
             "type": "iframe",
             "protocol": "",
             "port": "",
-            "url": "/cgi/ThirdParty/daen-m3u8/index.cgi/",
+            "url": "/cgi/ThirdParty/fn-daen-m3u8/index.cgi/",
             "allUsers": true
         }
     }

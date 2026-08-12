@@ -2,10 +2,10 @@
   "data-share": {
     "shares": [
       {
-        "name": "daen-m3u8"
+        "name": "fn-daen-m3u8"
       },
       {
-        "name": "daen-m3u8/data"
+        "name": "fn-daen-m3u8/data"
       }
     ]
   }

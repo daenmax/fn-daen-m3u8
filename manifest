@@ -1,4 +1,4 @@
-appname               = daen-m3u8
+appname               = fn-daen-m3u8
 version               = 1.0.0
 display_name          = Daen的m3u8下载器
 desc                  = 一个基于N_m3u8DL-RE的M3U8下载工具
@@ -11,7 +11,7 @@ distributor           = DaenMax
 distributor_url           = "https://github.com/daenmax"
 
 desktop_uidir         = ui
-desktop_applaunchname = daen-m3u8.Application
+desktop_applaunchname = fn-daen-m3u8.Application
 disable_authorization_path=false
 
 ctl_stop=true

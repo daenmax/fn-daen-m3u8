@@ -1,5 +1,17 @@
 #!/bin/bash
 
 ### This script is called after the user installs the application.
+### 安装完成后，将系统注入的 TRIM_* 环境变量持久化，供 CGI 进程读取。
+
+{
+    echo "TRIM_APPDEST='${TRIM_APPDEST:-}'"
+    echo "TRIM_PKGVAR='${TRIM_PKGVAR:-}'"
+    echo "TRIM_DATA_SHARE_PATHS='${TRIM_DATA_SHARE_PATHS:-}'"
+    echo "TRIM_DATA_ACCESSIBLE_PATHS='${TRIM_DATA_ACCESSIBLE_PATHS:-}'"
+    echo "M3U8_JOB_NUM='${M3U8_JOB_NUM:-}'"
+    echo "M3U8_JOB_DOWNLOAD_NUM='${M3U8_JOB_DOWNLOAD_NUM:-}'"
+    echo "M3U8_REFRESH_SECOND='${M3U8_REFRESH_SECOND:-}'"
+} > "${TRIM_PKGVAR}/app_env.conf" 2>/dev/null
+chmod 644 "${TRIM_PKGVAR}/app_env.conf" 2>/dev/null
 
 exit 0
