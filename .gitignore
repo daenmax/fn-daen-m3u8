@@ -1,0 +1,7 @@
+# 开发工具
+.idea/
+.reasonix/
+reasonix.toml
+
+# 开发暂存目录（N_m3u8DL-RE 源二进制、临时脚本等，不入库）
+temp/
