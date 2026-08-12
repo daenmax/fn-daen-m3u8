@@ -10,7 +10,7 @@
                 "type": "text",
                 "field": "M3U8_JOB_NUM",
                 "label": "单任务线程数",
-                "initValue": "5",
+                "initValue": "10",
                 "rules": [
                     {
                         "required": true,
@@ -27,7 +27,7 @@
                 "field": "M3U8_JOB_DOWNLOAD_NUM",
                 "label": "同时下载任务数",
                 "helpText": "同时最多下载的任务个数，超出部分排队等待",
-                "initValue": "3",
+                "initValue": "5",
                 "rules": [
                     {
                         "required": true,
