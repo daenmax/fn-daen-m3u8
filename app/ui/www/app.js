@@ -30,14 +30,17 @@
     let refreshTimer = null; // 任务列表自动刷新定时器
 
     // ===== 工具 =====
-    // 解析一行输入："名称$url" 或纯 "url"
+    // 解析一行输入：
+    //   "名称$url"、"名称$url$ffm3u8"（$ 后的无用后缀会被丢弃）、或纯 "url"
     function parseLine(line) {
         const s = line.trim();
         if (!s) return null;
         const idx = s.indexOf("$");
         if (idx > 0) {
             const name = s.slice(0, idx).trim();
-            const url = s.slice(idx + 1).trim();
+            let url = s.slice(idx + 1).trim();
+            const idx2 = url.indexOf("$");
+            if (idx2 >= 0) url = url.slice(0, idx2).trim(); // 丢弃 "$ffm3u8" 之类的无用后缀
             return { name, url };
         }
         return { name: "", url: s };

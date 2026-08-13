@@ -279,12 +279,13 @@ case "$ACTION" in
         "folder="*) folder=$(urldecode "${pair#folder=}") ;;
         "url="*)
           v=$(urldecode "${pair#url=}")
-          # 支持 "名称$url" 格式：$ 前为保存文件名（--save-name），$ 后为下载地址
+          # 支持 "名称$url" 或 "名称$url$ffm3u8"（$ 后的无用后缀丢弃）；$ 前为保存文件名
           name=""
           case "$v" in
             *'$'*)
               name="${v%%\$*}"
               v="${v#*\$}"
+              v="${v%%\$*}"
               ;;
           esac
           if validate_url "$v" && validate_name "$name"; then
