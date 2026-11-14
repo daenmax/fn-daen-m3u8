@@ -1,5 +1,5 @@
 appname               = fn-daen-m3u8
-version               = 1.0.0
+version               = 1.0.1
 display_name          = Daen的m3u8下载器
 desc                  = 一个基于N_m3u8DL-RE的M3U8下载工具，资源搜索地址：http://www.ffzy.tv/
 platform              = x86

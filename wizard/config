@@ -10,7 +10,7 @@
                 "type": "text",
                 "field": "M3U8_JOB_NUM",
                 "label": "单任务线程数",
-                "initValue": "10",
+                "initValue": "20",
                 "rules": [
                     {
                         "required": true,

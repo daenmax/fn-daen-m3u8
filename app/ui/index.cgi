@@ -228,18 +228,35 @@ output_files() {
   fi
 }
 
+# 读取任务字段（task.json 片段）
+task_field() {
+  local id="$1" key="$2" v
+  v=$(grep -o "\"${key}\":\"[^\"]*\"" "${TASKS_DIR}/${id}/task.json" 2>/dev/null | head -n1 | sed "s/^\"${key}\":\"//; s/\"\$//")
+  printf '%s' "$v"
+}
+
+# 任务所属任务组（每次点击“开始下载”生成一个组；老任务无 gid 时以自身 id 成组）
+task_gid() {
+  local id="$1" gid
+  gid=$(task_field "$id" gid)
+  [ -n "$gid" ] || gid="$id"
+  printf '%s' "$gid"
+}
+
 # 生成单个任务的 JSON 片段
 task_json() {
-  local id="$1" url="" name="" threads="" started="" st="" od="" pr=""
-  url=$(grep -o '"url":"[^"]*"' "${TASKS_DIR}/${id}/task.json" | head -n1 | sed 's/^"url":"//; s/"$//')
-  name=$(grep -o '"name":"[^"]*"' "${TASKS_DIR}/${id}/task.json" | head -n1 | sed 's/^"name":"//; s/"$//')
+  local id="$1" url="" name="" threads="" started="" st="" od="" pr="" gid="" seq=""
+  url=$(task_field "$id" url)
+  name=$(task_field "$id" name)
   threads=$(grep -o '"threads":[0-9]*' "${TASKS_DIR}/${id}/task.json" | head -n1 | sed 's/"threads"://')
-  started=$(grep -o '"started_at":"[^"]*"' "${TASKS_DIR}/${id}/task.json" | head -n1 | sed 's/^"started_at":"//; s/"$//')
+  started=$(task_field "$id" started_at)
+  seq=$(grep -o '"seq":[0-9]*' "${TASKS_DIR}/${id}/task.json" | head -n1 | sed 's/"seq"://')
+  gid=$(task_gid "$id")
   od=$(task_out_dir "$id")
   st=$(task_status "$id")
   pr=$(task_progress "$id")
-  printf '{"id":"%s","url":"%s","name":"%s","threads":%s,"status":"%s","progress":%s,"started_at":"%s","out_dir":"%s","output_files":[' \
-    "$id" "$(json_escape "$url")" "$(json_escape "$name")" "${threads:-5}" "$st" "$pr" "$(json_escape "$started")" "$(json_escape "$od")"
+  printf '{"id":"%s","gid":"%s","seq":%s,"url":"%s","name":"%s","threads":%s,"status":"%s","progress":%s,"started_at":"%s","out_dir":"%s","output_files":[' \
+    "$id" "$gid" "${seq:-0}" "$(json_escape "$url")" "$(json_escape "$name")" "${threads:-20}" "$st" "$pr" "$(json_escape "$started")" "$(json_escape "$od")"
   local first=1 f
   while IFS= read -r f; do
     [ -z "$f" ] && continue
@@ -297,10 +314,10 @@ case "$ACTION" in
     done
     IFS="$_SAVED_IFS"
 
-    # 线程数：默认取 wizard 配置 M3U8_JOB_NUM，兜底 5
-    [ -z "$threads" ] && threads="${M3U8_JOB_NUM:-5}"
+    # 线程数：默认取 wizard 配置 M3U8_JOB_NUM，兜底 20
+    [ -z "$threads" ] && threads="${M3U8_JOB_NUM:-20}"
     case "$threads" in
-      ''|*[!0-9]*) threads=5 ;;
+      ''|*[!0-9]*) threads=20 ;;
     esac
     [ "$threads" -lt 1 ] && threads=1
     [ "$threads" -gt 64 ] && threads=64
@@ -344,15 +361,23 @@ case "$ACTION" in
     [ "$max_jobs" -lt 1 ] && max_jobs=1
 
     # 逐个创建任务：由 run_task.sh 包装启动（等待并发槽位）
-    printf 'Content-Type: application/json\n\n{"ok":true,"tasks":['
+    # 每次点击“开始下载”生成一个任务组 gid，组内任务按 seq 排序
+    gid="$(date +%s)_$(printf '%06x' $((RANDOM * 32 + RANDOM)))"
+    printf 'Content-Type: application/json\n\n{"ok":true,"gid":"%s","tasks":[' "$gid"
     first=1
+    seq=0
     for i in "${!urls[@]}"; do
       u="${urls[$i]}"
       nm="${names[$i]}"
-      id="$(date +%s)_$(printf '%04x' $((RANDOM % 65536)))"
+      # 任务 id：时间戳 + 组内序号 + 随机数，避免同一秒内重复
+      id="$(date +%s)_$(printf '%02x%04x' "$seq" $((RANDOM % 65536)))"
+      while [ -d "${TASKS_DIR}/${id}" ]; do
+        id="$(date +%s)_$(printf '%02x%04x' "$seq" $((RANDOM % 65536)))"
+      done
+      seq=$((seq + 1))
       mkdir -p "$SAVE_DIR" "${TASKS_DIR}/${id}/tmp"
       cat > "${TASKS_DIR}/${id}/task.json" <<EOF
-{"id":"$id","url":"$(json_escape "$u")","name":"$(json_escape "$nm")","threads":$threads,"dir":"$(json_escape "$dir")","folder":"$(json_escape "$folder")","out_dir":"$(json_escape "$SAVE_DIR")","started_at":"$(date '+%Y-%m-%d %H:%M:%S')"}
+{"id":"$id","gid":"$gid","seq":$seq,"url":"$(json_escape "$u")","name":"$(json_escape "$nm")","threads":$threads,"dir":"$(json_escape "$dir")","folder":"$(json_escape "$folder")","out_dir":"$(json_escape "$SAVE_DIR")","started_at":"$(date '+%Y-%m-%d %H:%M:%S')"}
 EOF
       LOG_FILE="${TASKS_DIR}/${id}/log.txt"
       nohup bash "${APP_DEST}/bin/run_task.sh" \
@@ -366,7 +391,7 @@ EOF
         >> "$LOG_FILE" 2>&1 &
       echo "$!" > "${TASKS_DIR}/${id}/task.pid"
       if [ "$first" -eq 1 ]; then first=0; else printf ','; fi
-      printf '{"id":"%s","url":"%s","name":"%s"}' "$id" "$(json_escape "$u")" "$(json_escape "$nm")"
+      printf '{"id":"%s","gid":"%s","url":"%s","name":"%s"}' "$id" "$gid" "$(json_escape "$u")" "$(json_escape "$nm")"
     done
     printf ']}'
     ;;
@@ -414,6 +439,31 @@ EOF
     else
       printf 'Content-Type: application/json\n\n{"ok":true,"removed":"%s","note":"no task"}' "$id"
     fi
+    ;;
+
+  delete_group)
+    # 删除整个任务组：终止组内所有仍在运行的任务进程，并删除任务目录；
+    # 已下载的视频文件位于保存目录，不受影响。
+    gid=$(get_query_param gid "$QUERY_STRING")
+    removed=0
+    if valid_task_id "$gid" && [ -d "$TASKS_DIR" ]; then
+      for d in "$TASKS_DIR"/*/; do
+        [ -d "$d" ] || continue
+        id=$(basename "$d")
+        [ -f "${d}task.json" ] || continue
+        [ "$(task_gid "$id")" = "$gid" ] || continue
+        if [ -f "${d}task.pid" ]; then
+          pid=$(head -n 1 "${d}task.pid" | tr -d '[:space:]')
+          if [ -n "$pid" ]; then
+            kill -TERM "$pid" 2>/dev/null
+            sleep 1
+            kill -KILL "$pid" 2>/dev/null
+          fi
+        fi
+        rm -rf "$d" && removed=$((removed + 1))
+      done
+    fi
+    printf 'Content-Type: application/json\n\n{"ok":true,"gid":"%s","removed":%s}' "$gid" "$removed"
     ;;
 
   clear_tasks)

@@ -57,13 +57,27 @@ while :; do
 done
 
 # ---- 启动 N_m3u8DL-RE ----
+# 分片数量很大时（如 1000+ 片），默认的 ffmpeg concat 协议会一次性打开所有分片，
+# 容易触发 "Too many open files"。这里：
+#   1) 尽量把文件句柄上限提到硬上限；
+#   2) 使用 ffmpeg concat demuxer（顺序读取分片，占用句柄极少）。
+if _hard=$(ulimit -Hn 2>/dev/null); then
+    case "$_hard" in
+        unlimited) ulimit -n unlimited 2>/dev/null || true ;;
+        ''|*[!0-9]*) ;;
+        *) [ "$_hard" -gt 1024 ] && ulimit -n "$_hard" 2>/dev/null || true ;;
+    esac
+fi
+
 if [ -n "$name" ]; then
     "$n18_bin" "$url" --save-name "$name" --save-dir "$save_dir" --tmp-dir "$tmp_dir" \
         --thread-count "$threads" --no-ansi-color --no-log --disable-update-check \
+        --use-ffmpeg-concat-demuxer \
         --ui-language zh-CN --log-level INFO --del-after-done >> "$log_file" 2>&1 &
 else
     "$n18_bin" "$url" --save-dir "$save_dir" --tmp-dir "$tmp_dir" \
         --thread-count "$threads" --no-ansi-color --no-log --disable-update-check \
+        --use-ffmpeg-concat-demuxer \
         --ui-language zh-CN --log-level INFO --del-after-done >> "$log_file" 2>&1 &
 fi
 dl_pid=$!

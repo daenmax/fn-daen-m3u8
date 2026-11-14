@@ -15,7 +15,7 @@
     <main class="container">
         <section class="panel input-panel">
             <h2>新建下载任务</h2>
-            <p class="hint">每行一个 m3u8 地址，点击"开始下载"后所有地址将加入队列开始下载。</p>
+            <p class="hint">每行一个 m3u8 地址，点击"开始下载"后本次提交的所有地址会归为一个任务组，各组可单独展开查看、刷新或删除。</p>
             <textarea id="urls" rows="6" placeholder="https://example.com/video/index.m3u8&#10;保存文件名$https://example.com/movie/master.m3u8&#10;保存文件名$https://example.com/movie/master.m3u8$ffm3u8"></textarea>
             <div class="options-row">
                 <label for="dirSelect">下载到：</label>
@@ -23,7 +23,7 @@
                 <label for="folderName">文件夹名：</label>
                 <input type="text" id="folderName" maxlength="100" placeholder="留空则直接下载到所选目录">
                 <label for="threads">线程数：</label>
-                <input type="number" id="threads" min="1" max="64" value="5">
+                <input type="number" id="threads" min="1" max="64" value="20">
                 <button id="startBtn" class="btn primary">开始下载</button>
                 <span id="formError" class="error"></span>
             </div>
@@ -33,11 +33,10 @@
             <div class="panel-head">
                 <h2>下载任务 <span id="taskCount" class="count"></span></h2>
                 <div class="panel-actions">
-                    <button id="clearLogsBtn" class="btn ghost">清空任务</button>
                     <button id="refreshBtn" class="btn ghost">刷新</button>
                 </div>
             </div>
-            <div id="taskList" class="task-list"></div>
+            <div id="groupList" class="group-list"></div>
             <p id="emptyTip" class="empty">暂无任务，请在上方输入 m3u8 地址。</p>
         </section>
 
