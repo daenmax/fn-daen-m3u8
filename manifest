@@ -1,14 +1,14 @@
 appname               = fn-daen-m3u8
 version               = 1.0.1
 display_name          = Daen的m3u8下载器
-desc                  = 一个基于N_m3u8DL-RE的M3U8下载工具，资源搜索地址：http://www.ffzy.tv/
+desc                  = 一个基于N_m3u8DL-RE的M3U8下载工具，资源搜索地址：非凡资源网http://www.ffzy.tv/，量子资源网http://www.lzizy.com/，无尽资源网https://www.wujinzy.cc/
 platform              = x86
 source                = thirdparty
 
 maintainer            = DaenMax
 maintainer_url="https://github.com/daenmax"
-distributor           = DaenMax
-distributor_url           = "https://github.com/daenmax"
+distributor           = GitHub
+distributor_url           = "https://github.com/daenmax/fn-daen-m3u8"
 
 desktop_uidir         = ui
 desktop_applaunchname = fn-daen-m3u8.Application
