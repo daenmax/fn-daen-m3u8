@@ -1,5 +1,4 @@
-# fn-daen-m3u8
-Daen的m3u8下载器
+# Daen的m3u8下载器
 
 飞牛Nas原生应用：Daen的m3u8下载器，用来多线程下载m3u8到NAS，支持各大资源网
 
